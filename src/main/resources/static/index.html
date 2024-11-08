@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Product Management</title>
+</head>
+<body>
+<h1>Product Management</h1>
+
+<!-- Form pentru a adăuga un nou produs -->
+<h2>Add New Product</h2>
+<form id="addProductForm">
+    <label>Name:</label>
+    <input type="text" id="productName" required>
+    <label>Description:</label>
+    <input type="text" id="productDescription" required>
+    <label>Price:</label>
+    <input type="number" id="productPrice" required>
+    <button type="button" onclick="addProduct()">Add Product</button>
+</form>
+
+<h2>Product List</h2>
+<button onclick="fetchProducts()">Refresh Products</button>
+<div id="products"></div>
+
+<!-- Form pentru a actualiza un produs -->
+<h2>Update Product</h2>
+<form id="updateProductForm">
+    <label>ID:</label>
+    <input type="number" id="updateProductId" required>
+    <label>Name:</label>
+    <input type="text" id="updateProductName">
+    <label>Description:</label>
+    <input type="text" id="updateProductDescription">
+    <label>Price:</label>
+    <input type="number" id="updateProductPrice">
+    <button type="button" onclick="updateProduct()">Update Product</button>
+</form>
+
+<!-- Form pentru a șterge un produs -->
+<h2>Delete Product</h2>
+<form id="deleteProductForm">
+    <label>Product ID:</label>
+    <input type="number" id="deleteProductId" required>
+    <button type="button" onclick="deleteProduct()">Delete Product</button>
+</form>
+
+<script>
+    const apiUrl = 'http://localhost:8080/api/products';
+
+    // Funcție pentru a obține toate produsele
+    async function fetchProducts() {
+        const response = await fetch(apiUrl);
+        const products = await response.json();
+        const productsDiv = document.getElementById('products');
+        productsDiv.innerHTML = '';
+        products.forEach(product => {
+            productsDiv.innerHTML += `
+                    <div>
+                        <p>ID: ${product.id}</p>
+                        <p>Name: ${product.name}</p>
+                        <p>Description: ${product.description}</p>
+                        <p>Price: ${product.price}</p>
+                    </div>
+                    <hr>
+                `;
+        });
+    }
+
+    // Funcție pentru a adăuga un nou produs
+    async function addProduct() {
+        const name = document.getElementById('productName').value;
+        const description = document.getElementById('productDescription').value;
+        const price = document.getElementById('productPrice').value;
+
+        const product = { name, description, price };
+
+        const response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(product)
+        });
+
+        if (response.ok) {
+            alert("Product added successfully");
+            fetchProducts();  // Actualizează lista de produse
+        } else {
+            alert("Failed to add product");
+        }
+    }
+
+    // Funcție pentru a actualiza un produs
+    async function updateProduct() {
+        const id = document.getElementById('updateProductId').value;
+        const name = document.getElementById('updateProductName').value;
+        const description = document.getElementById('updateProductDescription').value;
+        const price = document.getElementById('updateProductPrice').value;
+
+        const productDetails = { name, description, price };
+
+        const response = await fetch(`${apiUrl}/${id}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(productDetails)
+        });
+
+        if (response.ok) {
+            alert("Product updated successfully");
+            fetchProducts();  // Actualizează lista de produse
+        } else {
+            alert("Failed to update product");
+        }
+    }
+
+    // Funcție pentru a șterge un produs
+    async function deleteProduct() {
+        const id = document.getElementById('deleteProductId').value;
+
+        const response = await fetch(`${apiUrl}/${id}`, {
+            method: 'DELETE'
+        });
+
+        if (response.ok) {
+            alert("Product deleted successfully");
+            fetchProducts();  // Actualizează lista de produse
+        } else {
+            alert("Failed to delete product");
+        }
+    }
+</script>
+</body>
+</html>
